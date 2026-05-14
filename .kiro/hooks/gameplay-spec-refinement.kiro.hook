@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Gameplay spec refinement",
+  "description": "Manual workflow to turn a loose gameplay idea into requirements, design notes, and tasks.",
+  "version": "1.0.0",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Guide the user through refining a paddle arcade gameplay idea into Kiro spec updates. Ask only for decisions that cannot be inferred from existing specs and steering. Produce requirements first, then design changes and spec-local ADRs for significant architectural choices, then implementation tasks. Keep React/Phaser/TypeScript architecture aligned with .kiro/steering."
+  }
+}

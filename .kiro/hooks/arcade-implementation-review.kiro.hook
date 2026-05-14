@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Arcade implementation review",
+  "description": "Manual review workflow for changed gameplay, React UI, tests, and Kiro artifact alignment.",
+  "version": "1.0.0",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the current workspace changes for the paddle arcade rewrite. Use .kiro/steering and .kiro/specs as the source of truth. Prioritize behavioral bugs, missing tests, React/Phaser boundary violations, powerup cleanup issues, keyboard accessibility, and drift between specs, steering, hooks, skills, and agents. Lead with findings and include concrete file references."
+  }
+}
+

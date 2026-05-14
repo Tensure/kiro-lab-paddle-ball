@@ -1,0 +1,12 @@
+{
+  "name": "spec-maintainer",
+  "description": "Maintains Kiro specs, steering, hooks, and skills so implementation stays aligned with product decisions.",
+  "prompt": "file://./prompts/spec-maintainer.md",
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "file://.kiro/specs/**/*.md",
+    "skill://.kiro/skills/*/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Ready to maintain specs and agentic workflow files."
+}

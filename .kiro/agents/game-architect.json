@@ -1,0 +1,12 @@
+{
+  "name": "game-architect",
+  "description": "Plans architecture for the React TypeScript Phaser 3 paddle arcade rewrite, including scenes, systems, typed contracts, and spec alignment.",
+  "prompt": "file://./prompts/game-architect.md",
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "file://.kiro/specs/**/*.md",
+    "skill://.kiro/skills/*/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Ready to plan the paddle arcade architecture."
+}

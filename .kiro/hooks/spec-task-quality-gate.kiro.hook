@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Spec task quality gate",
+  "description": "After a Kiro spec task completes, asks the agent to verify tests, steering alignment, and task completion quality.",
+  "version": "1.0.0",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task just completed. Verify the implementation against the relevant requirements, design, tasks, steering, and ADRs. Check whether focused tests were added or updated. Run available validation commands if the project is scaffolded. If the task caused new architectural decisions, ensure spec-local ADRs exist under the spec decisions/ directory. Recommend repo-level ADR or steering updates for durable cross-spec decisions."
+  }
+}

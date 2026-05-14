@@ -1,0 +1,12 @@
+{
+  "name": "quality-reviewer",
+  "description": "Reviews paddle arcade changes for behavioral bugs, missing tests, game-feel regressions, accessibility, and spec drift.",
+  "prompt": "file://./prompts/quality-reviewer.md",
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "file://.kiro/specs/**/*.md",
+    "skill://.kiro/skills/*/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Ready to review gameplay, UI, tests, and spec alignment."
+}

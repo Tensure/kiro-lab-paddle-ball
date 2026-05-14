@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Steering drift check",
+  "description": "When Kiro steering changes, checks for contradictions across specs, agents, hooks, skills, and powers.",
+  "version": "1.0.0",
+  "when": {
+    "type": "fileSave",
+    "filePattern": ".kiro/steering/*.md"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A steering file was saved: $FILE_PATH. Check all .kiro artifacts for contradictions or stale references caused by this change. Verify inclusion frontmatter, mode names, technology decisions, test expectations, and powerup rules remain consistent. Suggest or make minimal updates to affected .kiro files."
+  }
+}
+

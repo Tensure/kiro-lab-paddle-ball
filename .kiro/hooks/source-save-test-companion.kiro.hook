@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Source save test companion",
+  "description": "When TypeScript source files are saved, asks Kiro to check whether focused tests need updates.",
+  "version": "1.0.0",
+  "when": {
+    "type": "fileSave",
+    "filePattern": "src/**/*.{ts,tsx}"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was saved: $FILE_PATH. Check whether this change affects pure gameplay rules, React settings/menu behavior, typed scene events, audio routing, or powerup eligibility. If tests are missing or stale, add or update focused tests. Prefer unit tests for pure TypeScript modules and lightweight React tests for UI settings. Do not create brittle tests that inspect Phaser internals directly."
+  }
+}
+

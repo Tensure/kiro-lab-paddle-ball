@@ -1,0 +1,12 @@
+{
+  "name": "gameplay-implementer",
+  "description": "Implements focused gameplay features for Pong, Breakout, audio, and powerups using the repo steering and specs.",
+  "prompt": "file://./prompts/gameplay-implementer.md",
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "file://.kiro/specs/**/*.md",
+    "skill://.kiro/skills/*/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Ready to implement a focused gameplay slice."
+}
