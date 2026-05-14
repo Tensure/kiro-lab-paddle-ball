@@ -1,0 +1,37 @@
+{
+  "name": "paddle-arcade",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "3.90.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zustand": "5.0.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "fast-check": "^4.8.0",
+    "happy-dom": "^20.9.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.59.3",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.6"
+  }
+}

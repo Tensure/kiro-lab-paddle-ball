@@ -1,0 +1,338 @@
+/* Neon Arcade Design Tokens */
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-surface: #14141f;
+  --bg-overlay: rgba(5, 5, 10, 0.85);
+  --text-primary: #e8e8f0;
+  --text-secondary: #8888aa;
+  --accent-neon: #00ffcc;
+  --accent-glow: 0 0 8px rgba(0, 255, 204, 0.4);
+  --accent-danger: #ff4466;
+  --border-color: #2a2a3f;
+  --border-radius: 4px;
+  --focus-ring: 0 0 0 2px var(--accent-neon);
+  --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Shell Container */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.btn:hover {
+  border-color: var(--accent-neon);
+}
+
+.btn:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.btn:active {
+  background: #1a1a2f;
+}
+
+.btn--primary {
+  border-color: var(--accent-neon);
+  color: var(--accent-neon);
+}
+
+.btn--primary:hover {
+  box-shadow: var(--accent-glow);
+}
+
+.btn--danger {
+  border-color: var(--accent-danger);
+  color: var(--accent-danger);
+}
+
+/* Segmented Control */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.segmented__btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-family);
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  outline: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.segmented__btn:last-child {
+  border-right: none;
+}
+
+.segmented__btn:hover {
+  color: var(--text-primary);
+}
+
+.segmented__btn:focus-visible {
+  box-shadow: var(--focus-ring);
+  z-index: 1;
+  position: relative;
+}
+
+.segmented__btn--active {
+  color: var(--accent-neon);
+  background: #1a1a2f;
+}
+
+/* Form Controls */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-input {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  outline: none;
+  width: 5rem;
+}
+
+.form-input:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.form-input::-webkit-inner-spin-button,
+.form-input::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* Toggle / Checkbox */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.toggle input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--accent-neon);
+  cursor: pointer;
+}
+
+.toggle input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Volume Slider */
+.volume-slider {
+  width: 6rem;
+  accent-color: var(--accent-neon);
+  cursor: pointer;
+}
+
+.volume-slider:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay);
+  z-index: 100;
+  gap: 1.5rem;
+}
+
+.overlay__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-neon);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.overlay__subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+.overlay__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 12rem;
+}
+
+/* Mode Cards */
+.mode-grid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10rem;
+  height: 6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mode-card:hover {
+  border-color: var(--accent-neon);
+}
+
+.mode-card:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.mode-card:active {
+  background: #1a1a2f;
+}
+
+/* Settings Panel */
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  min-width: 20rem;
+}
+
+.settings-panel__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent-neon);
+}
+
+.settings-panel__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* Audio Controls */
+.audio-controls {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 50;
+}
+
+.audio-controls__mute {
+  padding: 0.4rem 0.6rem;
+  font-size: 1.25rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+}
+
+.audio-controls__mute:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.audio-controls__mute--muted {
+  color: var(--text-secondary);
+}
+
+/* Error Message */
+.error-message {
+  font-size: 0.875rem;
+  color: var(--accent-danger);
+  margin-top: 0.25rem;
+}
+
+/* Heading */
+.screen-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  text-align: center;
+}

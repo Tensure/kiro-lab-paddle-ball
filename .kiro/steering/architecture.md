@@ -6,6 +6,16 @@ inclusion: always
 
 Build the rewrite as a Vite React TypeScript app with Phaser 3 embedded inside React.
 
+## Toolchain
+
+- **Build:** Vite with `@vitejs/plugin-react`
+- **Language:** TypeScript in strict mode
+- **UI framework:** React 19
+- **Game engine:** Phaser 3 (latest v3.x)
+- **Test runner:** Vitest with fast-check for property-based tests
+- **Linter:** ESLint with typescript-eslint and react-hooks plugins
+- **Package manager:** npm with exact version pinning for core deps
+
 Use one unified Phaser game with shared core systems and mode-specific scenes. Shared systems should handle cross-mode concepts such as:
 
 - game configuration and settings validation

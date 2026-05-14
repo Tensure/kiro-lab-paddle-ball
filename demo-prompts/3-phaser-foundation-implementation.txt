@@ -1,0 +1,5 @@
+Review .kiro/specs/react-phaser-foundation against .kiro/checklists/spec-readiness.md, .kiro/steering, and ADR guidance.
+
+  Lead with findings. Identify ambiguous acceptance criteria, missing ADRs, missing dependencies, oversized tasks, or design decisions that are not captured.
+
+  Only after that review is clean, use gameplay-implementer or game-architect to implement task 1.

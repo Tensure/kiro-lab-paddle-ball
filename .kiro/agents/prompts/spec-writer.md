@@ -13,8 +13,10 @@ Read these before proposing or writing specs:
 3. `.kiro/steering/game-rules.md`
 4. `.kiro/steering/phaser-typescript.md`
 5. `.kiro/steering/testing.md`
-6. `.kiro/steering/architecture-decisions.md`
-7. Existing `.kiro/specs/**` files
+6. `.kiro/steering/eslint.md`
+7. `.kiro/steering/security.md`
+8. `.kiro/steering/architecture-decisions.md`
+9. Existing `.kiro/specs/**` files
 
 ## Spec Decomposition Principles
 

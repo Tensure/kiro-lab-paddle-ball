@@ -1,0 +1,16 @@
+Review .kiro/specs/README.md against the repo steering, delivery standards, ADR guidance, and existing baseline spec.
+
+  Check:
+  - whether each planned spec has one coherent capability
+  - whether dependencies are correct
+  - whether the implementation order is realistic
+  - whether any spec is too large or too vague
+  - whether tests, ADRs, hooks, skills, and agents are represented at the right points
+  - whether the roadmap avoids pre-deciding implementation details that belong in later design.md files
+  - whether the backlog supports incremental professional delivery
+
+  Lead with findings. Then recommend concrete edits to .kiro/specs/README.md.
+
+  After that review is clean, the next step is to ask spec-writer to create the first real spec, likely:
+
+  Create .kiro/specs/react-phaser-foundation/ using .kiro/specs/_template. Include requirements with EARS acceptance criteria, design, tasks, and spec-local ADRs under decisions/.

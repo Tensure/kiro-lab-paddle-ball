@@ -1,0 +1,27 @@
+Use the spec-writer agent and start with this prompt:
+
+  Read the repo steering, ADR guidance, delivery standards, and current baseline spec. Break the paddle arcade product into an implementable Kiro spec backlog.
+
+  Do not create individual feature specs yet.
+
+  Create .kiro/specs/README.md as the roadmap. Include:
+  - the recommended implementation order
+  - each spec name
+  - each spec's goal
+  - dependencies
+  - status
+  - what the spec proves
+  - why the spec is scoped correctly
+  - which agent should usually own implementation or review
+
+  Use the existing product direction:
+  - React + TypeScript + Phaser 3
+  - Pong: Solo
+  - Pong: Versus
+  - Breakout
+  - synthesized sound effects
+  - optional mode-aware powerups
+  - clean neon arcade visual direction
+  - focused tests for pure rules and React settings
+
+  Keep the backlog sized for professional incremental delivery. If any product decisions are missing, ask only the questions that block backlog creation.

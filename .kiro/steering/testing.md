@@ -25,6 +25,20 @@ Use property-based tests where they add value, especially for invariants inherit
 - reset/serve helpers place balls in valid positions
 - generated brick grids do not overlap and fit inside play bounds
 
+## Test Runner
+
+Use Vitest as the test runner. It shares Vite's transform pipeline and config, so module resolution is consistent between dev, build, and test.
+
+- Configure with `happy-dom` environment for React component tests.
+- Use standard Node environment for pure module tests.
+- Run in single-execution mode for CI: `vitest run`.
+- Test file pattern: `src/**/*.test.{ts,tsx}`.
+- Use `fast-check` for property-based tests — it integrates with Vitest without plugins.
+- Minimum 100 iterations per property test.
+- Tag format for property tests: `Feature: <spec-name>, Property <N>: <property_text>`
+
+Do not use Jest. The project uses Vitest exclusively (see ADR-003 in `react-phaser-foundation`).
+
 React tests should cover settings and menu behavior:
 
 - selected mode changes visible settings

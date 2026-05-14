@@ -4,7 +4,7 @@ inclusion: always
 
 # Product Direction
 
-This project is evolving from a single-file HTML paddle-ball prototype into a better arcade paddle game built with React, TypeScript, and Phaser 3.
+This project is evolving from a single-file HTML paddle-ball prototype into a better arcade paddle game built with React 19, TypeScript, and Phaser 3.
 
 The target experience has three launchable modes:
 
