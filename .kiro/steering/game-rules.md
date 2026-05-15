@@ -13,6 +13,12 @@ Pong has two variants:
 
 Pong win score is configurable before starting a match only. Default to `7`, and use a reasonable range such as `3` through `21`. Lock the value once the match starts.
 
+Display a scoreboard on the Pong canvas during gameplay showing:
+- Left player score and right player score
+- Target win score (e.g., "First to 7")
+- Use Phaser text rendered directly on the canvas, positioned at the top center
+- Update the scoreboard immediately when a point is scored
+
 When a player reaches the configured win score:
 
 - stop active gameplay

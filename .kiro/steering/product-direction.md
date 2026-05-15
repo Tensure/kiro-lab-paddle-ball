@@ -17,6 +17,8 @@ React owns app shell concerns: mode selection, settings, overlays, pause/restart
 Core product expectations:
 
 - Use a clean neon arcade direction: dark neutral background, crisp geometric paddles/bricks, restrained glow/particle feedback, high contrast, and readable HUDs.
+- Display a visible scoreboard during Pong matches showing both players' scores and the target win score. Use Phaser text or graphics rendered on the canvas (not a React overlay) so it stays in sync with gameplay.
+- Display score and lives during Breakout matches on the canvas.
 - Keep gameplay keyboard-only for v1.
 - Keep pointer support limited to React menus and buttons.
 - Provide sound effects for important game events.

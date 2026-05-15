@@ -15,11 +15,23 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 | 3 | `audio-system` | ✅ Complete |
 | 4 | `react-app-shell` | ✅ Complete |
 | 5 | `pong-core` | ✅ Complete |
-| 6 | `pong-ai` | Not Started |
-| 7 | `breakout-core` | Not Started |
-| 8 | `match-lifecycle` | Not Started |
-| 9 | `neon-visuals` | Not Started |
-| 10 | `powerups` | Not Started |
+| 6 | `pong-ai` | ✅ Complete |
+| 7 | `breakout-core` | ✅ Complete |
+| 8 | `match-lifecycle` | ✅ Complete |
+| 9 | `neon-visuals` | ✅ Complete |
+| 10 | `powerups` | ✅ Complete |
+
+---
+
+## Follow-Up Items (Post-Backlog)
+
+These items were identified during implementation and should be addressed:
+
+| Item | Priority | Belongs In | Description |
+|------|----------|-----------|-------------|
+| Pong scoreboard HUD | High | `pong-core` | Display both players' scores and target win score on the Phaser canvas during Pong matches. Use Phaser text at top center, update on each `score:update`. |
+| Breakout score/lives HUD | High | `breakout-core` | Display current score and remaining lives on the Phaser canvas during Breakout matches. |
+| Restart from win/loss overlay | Medium | `match-lifecycle` | Verify restart works cleanly from win/loss state in all modes. |
 
 ---
 
@@ -140,6 +152,7 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 - Scoring: ball off edge awards point to opponent
 - Configurable win score (received from shell, locked at match start)
 - Ball speed increases slightly on each paddle hit (resets on point scored)
+- Scoreboard HUD rendered on Phaser canvas: both players' scores and "First to N" label, updated on each point
 - Scene emits score/win/pause events to React shell via event bridge
 - Audio event emission for hits, bounces, scores, win
 - Serve direction alternates after each point
@@ -187,6 +200,7 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 - Brick grid generated from pure rule module
 - Score tracking (points per brick)
 - Lives display, starting at 3
+- Scoreboard HUD rendered on Phaser canvas: current score and remaining lives, updated on each brick break and life loss
 - Win condition: all bricks cleared
 - Loss condition: all lives gone
 - Scene emits score/lives/win/loss events to React shell
@@ -313,4 +327,4 @@ These are handled incrementally across specs rather than in a single dedicated s
 - Settings persistence is nice-to-have, not blocking.
 - Powerup types are deferred to the `powerups` spec; `shared-types-and-rules` should not pre-define them.
 - See `.kiro/steering/phaser-typescript.md` "Phaser Arcade Physics Pitfalls" section for critical implementation patterns learned during `pong-core` and `pong-ai` — these MUST be followed by any scene spec to avoid paddle movement, ball scoring, and keyboard input bugs.
-- See `.kiro/steering/architecture.md` "Critical Implementation Rules" for the full list of 7 rules including the Escape key ownership rule (only GameView handles Escape — overlays must not register their own Escape handlers).
+- See `.kiro/steering/architecture.md` "Critical Implementation Rules" for the full list of 9 rules including the Escape key ownership rule, the scene pause method rule (manual velocity save/restore, not Phaser API), and the paddle velocity zeroing rule.

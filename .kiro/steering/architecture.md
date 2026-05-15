@@ -98,4 +98,6 @@ These rules exist because violating them caused real bugs during implementation:
 5. **Use the SceneLauncher pattern for passing data to scenes.** Don't rely on Phaser's `scene.add` data parameter timing.
 6. **Add a visible serve delay (500ms–1s)** before the first serve and between points so players can see the ball reset.
 7. **Only ONE component should own the Escape key handler.** GameView handles both pause and unpause via its single `document` keydown listener. Overlays must NOT register their own Escape handlers — this causes race conditions where pause is immediately undone on the same keypress.
+8. **Do NOT use `this.physics.pause()` or `this.scene.pause()` for pausing.** When scenes are added dynamically via `postBoot`, these Phaser system references may be null. Instead, use a manual approach: set `this.paused = true` (gates the update loop), save the ball's velocity, set ball velocity to 0, and also zero all paddle velocities (including AI). On resume, restore the saved velocity. If the saved velocity was {0,0} (paused before serve), schedule a new serve after a short delay.
+9. **When pausing, zero ALL body velocities — not just the ball.** AI paddle velocity persists between frames even when `update()` stops running. Explicitly set paddle velocities to 0 on pause. On resume, the next `update()` frame will set them correctly again.
 
