@@ -1,5 +1,5 @@
 Review .kiro/specs/README.md against the repo steering, delivery standards, ADR guidance, and existing baseline spec.
-
+ use the ado grill me power to clarify the feature for the spec. 
   Check:
   - whether each planned spec has one coherent capability
   - whether dependencies are correct
@@ -13,4 +13,4 @@ Review .kiro/specs/README.md against the repo steering, delivery standards, ADR 
 
   After that review is clean, the next step is to ask spec-writer to create the first real spec, likely:
 
-  Create .kiro/specs/react-phaser-foundation/ using .kiro/specs/_template. Include requirements with EARS acceptance criteria, design, tasks, and spec-local ADRs under decisions/.
+  Create .kiro/specs/pong-core using .kiro/specs/_template. Include requirements with EARS acceptance criteria, design, tasks, and spec-local ADRs under decisions/.

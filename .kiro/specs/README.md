@@ -10,11 +10,11 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 
 | # | Spec Name | Status |
 |---|-----------|--------|
-| 1 | `react-phaser-foundation` | Not Started |
-| 2 | `shared-types-and-rules` | Not Started |
-| 3 | `audio-system` | Not Started |
-| 4 | `react-app-shell` | Not Started |
-| 5 | `pong-core` | Not Started |
+| 1 | `react-phaser-foundation` | ✅ Complete |
+| 2 | `shared-types-and-rules` | ✅ Complete |
+| 3 | `audio-system` | ✅ Complete |
+| 4 | `react-app-shell` | ✅ Complete |
+| 5 | `pong-core` | ✅ Complete |
 | 6 | `pong-ai` | Not Started |
 | 7 | `breakout-core` | Not Started |
 | 8 | `match-lifecycle` | Not Started |
@@ -89,6 +89,7 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 - Mute toggle and volume control interface
 - Integration hook for Phaser scenes (emit event → sound plays)
 - React-accessible mute/volume state
+- **CRITICAL:** AudioManager requires explicit `init()` call from GameView on mount and `destroy()` on unmount. It is a passive EventBridge listener that does nothing until initialized.
 
 **Spec-local ADRs expected:** Web Audio synthesis approach, Phaser sound manager vs custom wrapper.
 
@@ -138,6 +139,7 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 - Keyboard input: left player W/S, right player ArrowUp/ArrowDown
 - Scoring: ball off edge awards point to opponent
 - Configurable win score (received from shell, locked at match start)
+- Ball speed increases slightly on each paddle hit (resets on point scored)
 - Scene emits score/win/pause events to React shell via event bridge
 - Audio event emission for hits, bounces, scores, win
 - Serve direction alternates after each point
@@ -226,7 +228,7 @@ Each spec is sized for incremental delivery: one concern, clear boundaries, test
 
 **Dependencies:** `pong-core`, `breakout-core`, `react-app-shell`
 
-**Scope rationale:** Visual polish is best applied after gameplay and UI are stable. Separating it avoids mixing rendering concerns with physics/logic debugging. It also lets visual work be reviewed for game feel independently. This spec's requirements will need careful scoping during design to define exactly which treatments apply where.
+**Scope rationale:** Visual polish is best applied after gameplay and UI are stable. Separating it avoids mixing rendering concerns with physics/logic debugging. It also lets visual work be reviewed for game feel independently. This spec's requirements will need careful scoping during design to define exactly which treatments apply where. Note: React UI neon styling (CSS tokens, focus rings, dark theme) was delivered in `react-app-shell` — this spec focuses on Phaser-side visuals only.
 
 **Key deliverables:**
 - Neon glow on paddles, ball, and bricks (programmatic, no external assets)
@@ -310,3 +312,4 @@ These are handled incrementally across specs rather than in a single dedicated s
 - No high-score system in v1 per product direction.
 - Settings persistence is nice-to-have, not blocking.
 - Powerup types are deferred to the `powerups` spec; `shared-types-and-rules` should not pre-define them.
+- See `.kiro/steering/phaser-typescript.md` "Phaser Arcade Physics Pitfalls" section for critical implementation patterns learned during `pong-core` and `pong-ai` — these MUST be followed by any scene spec to avoid paddle movement, ball scoring, and keyboard input bugs.

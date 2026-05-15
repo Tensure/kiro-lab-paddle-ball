@@ -61,3 +61,40 @@ Use TypeScript-first boundaries. Define explicit types for:
 - scene-to-React events
 - audio event names
 
+## System Initialization Order
+
+When the game starts (GameView mounts), systems must be initialized in this order:
+
+1. **SceneLauncher** — call `setLaunchPayload(payload)` with the match settings BEFORE creating the Phaser game
+2. **AudioManager** — call `audioManager.init()` to create the AudioContext and subscribe to EventBridge audio events
+3. **Phaser Game** — create `new Phaser.Game(config)` with the scene added via `postBoot` callback
+4. **PongScene/BreakoutScene** — reads payload from SceneLauncher in `init()`, sets up physics and input in `create()`
+
+On cleanup (GameView unmounts):
+1. Destroy the Phaser game (`game.destroy(true)`)
+2. Destroy the AudioManager (`audioManager.destroy()`)
+
+The AudioManager is a passive EventBridge listener — it does nothing until `init()` is called. Forgetting to call `init()` results in silent audio (no errors, just no sound).
+
+## Communication Patterns
+
+| Direction | Mechanism | Example |
+|-----------|-----------|---------|
+| React → Phaser (launch) | SceneLauncher module variable | Settings, mode, winScore |
+| React → Phaser (runtime) | EventBridge events | `match:pause`, `scene:restart` |
+| Phaser → React | EventBridge events | `score:update`, `match:win`, `audio:*` |
+| React → AudioManager | Direct method calls | `toggleMute()`, `setVolume()` |
+| AudioManager → React | EventBridge `audio:state-change` | Mute/volume state updates |
+| Scenes → Audio | EventBridge `audio:*` events | Passive — AudioManager listens automatically |
+
+## Critical Implementation Rules (Learned from Bugs)
+
+These rules exist because violating them caused real bugs during implementation:
+
+1. **Never set `body.y` directly on a moving physics body.** Let Phaser move it via velocity, then clamp only at boundaries.
+2. **Always reposition the ball to center immediately when a point is scored.** Don't leave it out of bounds during a serve delay.
+3. **Use `window` event listeners for keyboard input** (not Phaser's keyboard plugin) when the game is embedded in React. Phaser's default targets the canvas which loses focus to React elements.
+4. **Always call `audioManager.init()` before gameplay starts.** It's a passive listener that does nothing until initialized.
+5. **Use the SceneLauncher pattern for passing data to scenes.** Don't rely on Phaser's `scene.add` data parameter timing.
+6. **Add a visible serve delay (500ms–1s)** before the first serve and between points so players can see the ball reset.
+
