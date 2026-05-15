@@ -96,7 +96,7 @@ describe('AudioManager', () => {
     for (const event of audioEvents) {
       expect(onSpy).toHaveBeenCalledWith(event, expect.any(Function));
     }
-    expect(onSpy).toHaveBeenCalledTimes(9);
+    expect(onSpy).toHaveBeenCalledTimes(10);
   });
 
   it('destroy unsubscribes all handlers from EventBridge', () => {
@@ -104,7 +104,7 @@ describe('AudioManager', () => {
     audioManager.init();
     audioManager.destroy();
 
-    expect(offSpy).toHaveBeenCalledTimes(9);
+    expect(offSpy).toHaveBeenCalledTimes(10);
   });
 
   it('destroy closes AudioContext', () => {

@@ -121,6 +121,25 @@ function powerupPickup(ctx: AudioContext, destination: AudioNode, time: number):
   }
 }
 
+/** Powerup expire: short descending tone 880→330Hz, ~150ms */
+function powerupExpire(ctx: AudioContext, destination: AudioNode, time: number): void {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, time);
+  osc.frequency.linearRampToValueAtTime(330, time + 0.15);
+
+  gain.gain.setValueAtTime(0.25, time);
+  gain.gain.linearRampToValueAtTime(0, time + 0.15);
+
+  osc.connect(gain);
+  gain.connect(destination);
+
+  osc.start(time);
+  osc.stop(time + 0.15);
+}
+
 /** Pause: sine, 440Hz, ~150ms */
 function pause(ctx: AudioContext, destination: AudioNode, time: number): void {
   const osc = ctx.createOscillator();
@@ -196,6 +215,7 @@ export function getSynthFunctions(): Record<AudioEventName, SynthFunction> {
     'audio:score-point': scorePoint,
     'audio:life-loss': lifeLoss,
     'audio:powerup-pickup': powerupPickup,
+    'audio:powerup-expire': powerupExpire,
     'audio:pause': pause,
     'audio:win': win,
     'audio:loss': loss,

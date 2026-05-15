@@ -6,6 +6,7 @@ export type AudioEventName =
   | 'audio:score-point'
   | 'audio:life-loss'
   | 'audio:powerup-pickup'
+  | 'audio:powerup-expire'
   | 'audio:pause'
   | 'audio:win'
   | 'audio:loss';

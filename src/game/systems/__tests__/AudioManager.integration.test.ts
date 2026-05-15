@@ -61,15 +61,15 @@ describe('AudioManager Integration', () => {
     mockContextState = 'running';
 
     // Re-stub AudioContext after resetModules
-    let callCount = 0;
+    let _callCount = 0;
     vi.stubGlobal('AudioContext', vi.fn(function () {
-      callCount = 0;
+      _callCount = 0;
       return {
         state: mockContextState,
         currentTime: 0,
         destination: {},
         createGain: vi.fn(() => {
-          callCount++;
+          _callCount++;
           return createMockGainNode();
         }),
         createOscillator: vi.fn(() => createMockOscillator()),

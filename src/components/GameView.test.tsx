@@ -2,16 +2,36 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { useAppStore } from '../app/store';
 
+// Stub AudioContext for AudioManager.init()
+vi.stubGlobal('AudioContext', vi.fn(function () {
+  return {
+    state: 'running',
+    currentTime: 0,
+    destination: {},
+    createGain: vi.fn(() => ({ gain: { value: 1 }, connect: vi.fn(), disconnect: vi.fn() })),
+    createOscillator: vi.fn(() => ({ connect: vi.fn(), start: vi.fn(), stop: vi.fn(), frequency: { setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() }, type: 'sine' })),
+    resume: vi.fn(() => Promise.resolve()),
+    close: vi.fn(() => Promise.resolve()),
+  };
+}));
+
 vi.mock('phaser', () => {
   class GameMock {
     destroy = vi.fn();
-    constructor() {}
+    scene = { add: vi.fn(), start: vi.fn() };
+    events = { once: vi.fn() };
+    constructor(config: { callbacks?: { postBoot?: (g: unknown) => void } }) {
+      // Simulate postBoot callback
+      if (config?.callbacks?.postBoot) {
+        config.callbacks.postBoot(this);
+      }
+    }
   }
   class SceneMock {
     constructor() {}
   }
   return {
-    default: { Game: GameMock, Scene: SceneMock, AUTO: 0 },
+    default: { Game: GameMock, Scene: SceneMock, AUTO: 0, Math: { FloatBetween: () => 0 } },
     Game: GameMock,
     Scene: SceneMock,
     AUTO: 0,
@@ -65,5 +85,32 @@ describe('GameView', () => {
     expect(unsubscribedEvents).toContain('match:win');
     expect(unsubscribedEvents).toContain('match:loss');
     expect(unsubscribedEvents).toContain('lives:update');
+  });
+
+  describe('Escape key guard (Task 3)', () => {
+    it('Escape does nothing when winLossOverlayOpen is true', () => {
+      useAppStore.setState({ winLossOverlayOpen: true, pauseOverlayOpen: false });
+      render(<GameView />);
+
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.dispatchEvent(event);
+
+      const state = useAppStore.getState();
+      expect(state.pauseOverlayOpen).toBe(false);
+      expect(state.winLossOverlayOpen).toBe(true);
+    });
+
+    it('Escape toggles pause when winLossOverlayOpen is false', () => {
+      useAppStore.setState({ winLossOverlayOpen: false, pauseOverlayOpen: false });
+      render(<GameView />);
+
+      // First Escape opens pause
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(useAppStore.getState().pauseOverlayOpen).toBe(true);
+
+      // Second Escape closes pause
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(useAppStore.getState().pauseOverlayOpen).toBe(false);
+    });
   });
 });

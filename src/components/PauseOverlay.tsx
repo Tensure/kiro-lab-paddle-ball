@@ -13,20 +13,7 @@ function PauseOverlay(): React.JSX.Element | null {
     if (!pauseOverlayOpen) return;
 
     firstButtonRef.current?.focus();
-
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closePauseOverlay();
-        eventBridge.emit('match:pause', { paused: false });
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [pauseOverlayOpen, closePauseOverlay]);
+  }, [pauseOverlayOpen]);
 
   if (!pauseOverlayOpen) return null;
 
@@ -38,6 +25,7 @@ function PauseOverlay(): React.JSX.Element | null {
   const handleRestart = (): void => {
     resetMatchData();
     closePauseOverlay();
+    eventBridge.emit('scene:restart');
   };
 
   const handleReturnToMenu = (): void => {

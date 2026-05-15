@@ -60,7 +60,7 @@ describe('SynthEngine', () => {
       expect(typeof fns[event]).toBe('function');
     }
 
-    expect(Object.keys(fns)).toHaveLength(9);
+    expect(Object.keys(fns)).toHaveLength(10);
   });
 
   describe('each synth function', () => {

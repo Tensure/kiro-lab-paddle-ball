@@ -25,9 +25,12 @@ export type EventMap = {
   'audio:score-point': undefined;
   'audio:life-loss': undefined;
   'audio:powerup-pickup': undefined;
+  'audio:powerup-expire': undefined;
   'audio:pause': undefined;
   'audio:win': undefined;
   'audio:loss': undefined;
+  // Scene lifecycle
+  'scene:restart': undefined;
   // Audio state change — carries current state for React consumption
   'audio:state-change': AudioState;
 };

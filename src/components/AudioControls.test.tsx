@@ -32,7 +32,8 @@ vi.mock('../game/systems/EventBridge', () => {
 
 import AudioControls from './AudioControls';
 import audioManager from '../game/systems/AudioManager';
-import eventBridge from '../game/systems/EventBridge';
+// eventBridge is mocked above — imported for type reference only
+import _eventBridge from '../game/systems/EventBridge';
 
 describe('AudioControls', () => {
   beforeEach(() => {

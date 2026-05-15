@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAppStore } from '../app/store';
+import eventBridge from '../game/systems/EventBridge';
 
 function WinLossOverlay(): React.JSX.Element | null {
   const winLossOverlayOpen = useAppStore((s) => s.winLossOverlayOpen);
@@ -19,6 +20,7 @@ function WinLossOverlay(): React.JSX.Element | null {
   const handleRestart = (): void => {
     resetMatchData();
     closeWinLossOverlay();
+    eventBridge.emit('scene:restart');
   };
 
   const handleReturnToMenu = (): void => {

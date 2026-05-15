@@ -52,7 +52,7 @@ export interface AppState {
   resetMatchData: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   // Initial state
   phase: 'menu',
   selectedMode: null,
@@ -83,18 +83,31 @@ export const useAppStore = create<AppState>((set) => ({
     matchData: { ...INITIAL_MATCH_DATA },
   }),
 
-  setWinScore: (score) => set({ winScore: validateWinScore(score) }),
+  setWinScore: (score) => {
+    if (get().phase === 'playing') return;
+    set({ winScore: validateWinScore(score) });
+  },
 
-  setAiDifficulty: (difficulty) => set({ aiDifficulty: difficulty }),
+  setAiDifficulty: (difficulty) => {
+    if (get().phase === 'playing') return;
+    set({ aiDifficulty: difficulty });
+  },
 
-  setPowerupsEnabled: (enabled) => set({ powerupsEnabled: enabled }),
+  setPowerupsEnabled: (enabled) => {
+    if (get().phase === 'playing') return;
+    set({ powerupsEnabled: enabled });
+  },
 
-  openPauseOverlay: () => set({ pauseOverlayOpen: true }),
+  openPauseOverlay: () => {
+    if (get().winLossOverlayOpen) return;
+    set({ pauseOverlayOpen: true });
+  },
 
   closePauseOverlay: () => set({ pauseOverlayOpen: false }),
 
   openWinLossOverlay: (winner, finalScore) => set({
     winLossOverlayOpen: true,
+    pauseOverlayOpen: false,
     matchData: {
       ...INITIAL_MATCH_DATA,
       winner,
