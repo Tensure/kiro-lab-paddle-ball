@@ -313,3 +313,4 @@ These are handled incrementally across specs rather than in a single dedicated s
 - Settings persistence is nice-to-have, not blocking.
 - Powerup types are deferred to the `powerups` spec; `shared-types-and-rules` should not pre-define them.
 - See `.kiro/steering/phaser-typescript.md` "Phaser Arcade Physics Pitfalls" section for critical implementation patterns learned during `pong-core` and `pong-ai` — these MUST be followed by any scene spec to avoid paddle movement, ball scoring, and keyboard input bugs.
+- See `.kiro/steering/architecture.md` "Critical Implementation Rules" for the full list of 7 rules including the Escape key ownership rule (only GameView handles Escape — overlays must not register their own Escape handlers).

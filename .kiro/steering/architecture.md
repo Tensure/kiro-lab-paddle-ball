@@ -97,4 +97,5 @@ These rules exist because violating them caused real bugs during implementation:
 4. **Always call `audioManager.init()` before gameplay starts.** It's a passive listener that does nothing until initialized.
 5. **Use the SceneLauncher pattern for passing data to scenes.** Don't rely on Phaser's `scene.add` data parameter timing.
 6. **Add a visible serve delay (500ms–1s)** before the first serve and between points so players can see the ball reset.
+7. **Only ONE component should own the Escape key handler.** GameView handles both pause and unpause via its single `document` keydown listener. Overlays must NOT register their own Escape handlers — this causes race conditions where pause is immediately undone on the same keypress.
 

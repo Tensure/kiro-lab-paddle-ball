@@ -27,9 +27,11 @@ A task or spec is done when:
 - focused tests are added or updated
 - available validation commands pass
 - keyboard behavior works for affected flows
+- **for scene specs: manual play-test confirms paddles move, ball bounces correctly, scoring works to configured win score, and audio plays**
 - mute/volume behavior is respected when audio is affected
 - powerup cleanup is verified when powerups are affected
 - pause, restart, win/loss, and return-to-menu flows are checked when match lifecycle is affected
+- AudioManager is initialized before gameplay and destroyed on cleanup
 - no unrelated refactors are mixed into the change
 - no unresolved TODOs remain unless documented in the spec roadmap
 
