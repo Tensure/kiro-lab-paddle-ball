@@ -29,6 +29,8 @@ These items were identified during implementation and should be addressed:
 
 | Item | Priority | Belongs In | Description |
 |------|----------|-----------|-------------|
+| Gamey ball physics | High | New spec: `ball-physics` | Rework ball bounce to use paddle-relative hit position for angle influence, add degenerate trajectory prevention, tune speed ramping to feel satisfying. Implement as pure rule functions with tunable constants. |
+| Extended menu configuration | High | New spec: `extended-settings` | Add ball speed preset, paddle size, ball speed increase (Pong); starting lives, ball speed, paddle size, brick density (Breakout). Extend settings types, validator, and UI. |
 | Pong scoreboard HUD | High | `pong-core` | Display both players' scores and target win score on the Phaser canvas during Pong matches. Use Phaser text at top center, update on each `score:update`. |
 | Breakout score/lives HUD | High | `breakout-core` | Display current score and remaining lives on the Phaser canvas during Breakout matches. |
 | Restart from win/loss overlay | Medium | `match-lifecycle` | Verify restart works cleanly from win/loss state in all modes. |
@@ -283,6 +285,55 @@ These items were identified during implementation and should be addressed:
 
 ---
 
+### 11. `ball-physics` (Planned)
+
+**Goal:** Rework ball bounce mechanics to feel gamey and satisfying. Implement paddle-relative angle influence, degenerate trajectory prevention, tunable speed ramping, and snappy serves. All physics-feel logic lives in pure rule functions with named constants.
+
+**Proves:** Ball behavior feels responsive and player-controllable. No boring horizontal loops. Paddle hit position meaningfully affects ball direction. Speed builds tension over a rally without feeling unfair.
+
+**Dependencies:** `pong-core`, `breakout-core`, `shared-types-and-rules`
+
+**Scope rationale:** Ball feel is the single biggest factor in whether the game feels fun. Isolating it into a dedicated spec lets us tune and test physics rules independently from scene wiring. Pure functions make property-based testing straightforward.
+
+**Key deliverables:**
+- Pure function: `computeBounceAngle(hitOffset, paddleHalfHeight, maxAngle)` for paddle-relative angle
+- Pure function: `ensureMinimumVerticalSpeed(vx, vy, minVyRatio)` for degenerate trajectory prevention
+- Physics config module (`src/game/rules/physics-config.ts`) with all tunable constants grouped by preset
+- Speed ramping respects "Ball speed increase" setting (Off / Gentle / Aggressive)
+- Base/max speed respects "Ball speed" preset (Slow / Normal / Fast)
+- Breakout brick-hit speed bump for punchy feel
+- Integration into PongScene and BreakoutScene
+- Property-based tests: angle stays within bounds, speed never exceeds max, vertical speed never drops below minimum ratio
+- Manual play-test confirms improved feel
+
+**Owner:** `gameplay-implementer` · **Reviewer:** `quality-reviewer`
+
+---
+
+### 12. `extended-settings` (Planned)
+
+**Goal:** Expand the pre-match settings UI with ball speed, paddle size, ball speed increase (Pong), and starting lives, ball speed, paddle size, brick density (Breakout). Extend types, validation, and store.
+
+**Proves:** Players can tune match feel before starting. All new settings flow through to scenes correctly. Defaults let players start without configuring anything.
+
+**Dependencies:** `ball-physics`, `react-app-shell`, `shared-types-and-rules`
+
+**Scope rationale:** Settings UI is a React concern that depends on the physics config being in place. Separating it from ball-physics keeps the physics spec focused on pure rules and the settings spec focused on UI, types, and validation.
+
+**Key deliverables:**
+- Extended `MatchSettings` types with new fields (ball speed preset, paddle size, speed increase, starting lives, brick density)
+- Updated settings validator with new field validation
+- Updated Zustand store with new setting state and actions
+- Updated SettingsPanel UI with segmented controls grouped into "Match Rules" and "Feel" sections
+- SceneLaunchPayload extended to carry new settings to scenes
+- Scenes read new settings and apply corresponding physics config values
+- React component tests for new settings controls
+- Property-based tests for settings validation with new fields
+
+**Owner:** `gameplay-implementer` · **Reviewer:** `quality-reviewer`
+
+---
+
 ## Cross-Cutting Concerns
 
 These are handled incrementally across specs rather than in a single dedicated spec:
@@ -302,6 +353,8 @@ These are handled incrementally across specs rather than in a single dedicated s
 | Spec-local ADRs | `react-phaser-foundation`, `audio-system`, `react-app-shell` (most likely); any spec with significant choices |
 | Settings persistence | Optional; add if straightforward during `react-app-shell` |
 | Accessibility (keyboard nav) | `react-app-shell` |
+| Ball physics feel | `ball-physics` (dedicated spec) |
+| Extended configuration UI | `extended-settings` (dedicated spec) |
 
 ---
 

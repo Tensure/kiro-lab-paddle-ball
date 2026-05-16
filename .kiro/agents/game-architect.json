@@ -1,7 +1,14 @@
 {
   "name": "game-architect",
   "description": "Plans architecture for the React TypeScript Phaser 3 paddle arcade rewrite, including scenes, systems, typed contracts, and spec alignment.",
-  "prompt": "file://./prompts/game-architect.md",
+  "prompt": "file://../agent-prompts/game-architect.md",
+  "tools": ["read", "write"],
+  "allowedTools": ["read"],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": [".kiro/specs/**", ".kiro/adr/**", ".kiro/steering/**"]
+    }
+  },
   "resources": [
     "file://.kiro/steering/**/*.md",
     "file://.kiro/specs/**/*.md",

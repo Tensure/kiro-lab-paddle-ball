@@ -1,7 +1,14 @@
 {
   "name": "gameplay-implementer",
   "description": "Implements focused gameplay features for Pong, Breakout, audio, and powerups using the repo steering and specs.",
-  "prompt": "file://./prompts/gameplay-implementer.md",
+  "prompt": "file://../agent-prompts/gameplay-implementer.md",
+  "tools": ["read", "write", "shell"],
+  "allowedTools": ["read"],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": ["src/**", "tests/**", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "vite.config.*", "tsconfig*.json", "eslint.config.*"]
+    }
+  },
   "resources": [
     "file://.kiro/steering/**/*.md",
     "file://.kiro/specs/**/*.md",

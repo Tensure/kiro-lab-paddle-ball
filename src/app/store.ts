@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { GameMode, PlayerId, AIDifficultyPreset } from '../game/types/modes';
+import type { BallSpeedPreset, PaddleSizePreset, SpeedIncreasePreset, BrickDensityPreset, StartingLives } from '../game/types/settings';
 import { validateWinScore } from '../game/rules/win-score';
 
 export type AppPhase = 'menu' | 'settings' | 'playing';
@@ -27,6 +28,11 @@ export interface AppState {
   winScore: number;
   aiDifficulty: AIDifficultyPreset;
   powerupsEnabled: boolean;
+  ballSpeedPreset: BallSpeedPreset;
+  paddleSizePreset: PaddleSizePreset;
+  speedIncreasePreset: SpeedIncreasePreset;
+  startingLives: StartingLives;
+  brickDensity: BrickDensityPreset;
 
   // Overlays
   pauseOverlayOpen: boolean;
@@ -43,6 +49,11 @@ export interface AppState {
   setWinScore: (score: number) => void;
   setAiDifficulty: (difficulty: AIDifficultyPreset) => void;
   setPowerupsEnabled: (enabled: boolean) => void;
+  setBallSpeedPreset: (preset: BallSpeedPreset) => void;
+  setPaddleSizePreset: (preset: PaddleSizePreset) => void;
+  setSpeedIncreasePreset: (preset: SpeedIncreasePreset) => void;
+  setStartingLives: (lives: StartingLives) => void;
+  setBrickDensity: (density: BrickDensityPreset) => void;
   openPauseOverlay: () => void;
   closePauseOverlay: () => void;
   openWinLossOverlay: (winner: PlayerId | null, finalScore: number | null) => void;
@@ -59,6 +70,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   winScore: 7,
   aiDifficulty: 'normal',
   powerupsEnabled: false,
+  ballSpeedPreset: 'normal',
+  paddleSizePreset: 'normal',
+  speedIncreasePreset: 'gentle',
+  startingLives: 3,
+  brickDensity: 'normal',
   pauseOverlayOpen: false,
   winLossOverlayOpen: false,
   matchData: { ...INITIAL_MATCH_DATA },
@@ -72,6 +88,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     pauseOverlayOpen: false,
     winLossOverlayOpen: false,
     matchData: { ...INITIAL_MATCH_DATA },
+    ballSpeedPreset: 'normal',
+    paddleSizePreset: 'normal',
+    speedIncreasePreset: 'gentle',
+    startingLives: 3,
+    brickDensity: 'normal',
   }),
 
   goToSettings: () => set({ phase: 'settings' }),
@@ -96,6 +117,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   setPowerupsEnabled: (enabled) => {
     if (get().phase === 'playing') return;
     set({ powerupsEnabled: enabled });
+  },
+
+  setBallSpeedPreset: (preset) => {
+    if (get().phase === 'playing') return;
+    set({ ballSpeedPreset: preset });
+  },
+
+  setPaddleSizePreset: (preset) => {
+    if (get().phase === 'playing') return;
+    set({ paddleSizePreset: preset });
+  },
+
+  setSpeedIncreasePreset: (preset) => {
+    if (get().phase === 'playing') return;
+    set({ speedIncreasePreset: preset });
+  },
+
+  setStartingLives: (lives) => {
+    if (get().phase === 'playing') return;
+    set({ startingLives: lives });
+  },
+
+  setBrickDensity: (density) => {
+    if (get().phase === 'playing') return;
+    set({ brickDensity: density });
   },
 
   openPauseOverlay: () => {

@@ -2,7 +2,10 @@ import Phaser from 'phaser';
 import eventBridge from '../systems/EventBridge';
 import { getLaunchPayload } from '../systems/SceneLauncher';
 import { awardPoint, type PongScores } from '../rules/scoring';
-import { computeSpeedAfterHit } from '../rules/ball-speed';
+import { getSpeedConfig, PHYSICS, type SpeedConfig } from '../rules/physics-config';
+import { computeSpeedAfterHit, getServeSpeed } from '../rules/speed-ramping';
+import { computeBounceAngle } from '../rules/bounce-angle';
+import { ensureMinimumVerticalSpeed } from '../rules/vertical-speed';
 import {
   AI_DIFFICULTY_CONFIGS,
   computeAITarget,
@@ -14,7 +17,7 @@ import { NeonGlow, GLOW_PRESETS, NEON_COLORS } from '../systems/NeonGlow';
 import { NeonParticles } from '../systems/NeonParticles';
 import { PowerupManager } from '../systems/PowerupManager';
 import type { SceneLaunchPayload } from '../types/payload';
-import type { PongSoloSettings } from '../types/settings';
+import type { PongSoloSettings, BallSpeedPreset, SpeedIncreasePreset, PaddleSizePreset } from '../types/settings';
 import type { PlayerId } from '../types/modes';
 import type { PowerupId } from '../types/powerup';
 
@@ -22,15 +25,10 @@ const PONG = {
   GAME_WIDTH: 800,
   GAME_HEIGHT: 600,
   PADDLE_WIDTH: 16,
-  PADDLE_HEIGHT: 100,
   PADDLE_OFFSET_X: 40,
   PADDLE_SPEED: 400,
   BALL_RADIUS: 8,
-  BASE_SPEED: 300,
-  SPEED_INCREMENT: 25,
-  MAX_SPEED: 600,
   WALL_THICKNESS: 16,
-  SERVE_DELAY_MS: 500,
 } as const;
 
 export default class PongScene extends Phaser.Scene {
@@ -54,8 +52,14 @@ export default class PongScene extends Phaser.Scene {
   private serveDirection: 'left' | 'right' = 'right';
   private matchOver = false;
   private paused = false;
-  private currentSpeed = PONG.BASE_SPEED;
+  private currentSpeed = 300;
   private _pausedVelocity: { x: number; y: number } | null = null;
+
+  // Physics config (preset-based)
+  private speedConfig!: SpeedConfig;
+  private paddleSizePreset: PaddleSizePreset = 'normal';
+  private ballSpeedPreset: BallSpeedPreset = 'normal';
+  private speedIncreasePreset: SpeedIncreasePreset = 'gentle';
 
   // AI state
   private isAIControlled = false;
@@ -100,6 +104,14 @@ export default class PongScene extends Phaser.Scene {
       this.winScore = 7;
     }
 
+    // Extract physics presets from match settings
+    this.ballSpeedPreset = payload?.settings?.ballSpeedPreset ?? 'normal';
+    this.speedIncreasePreset = payload?.settings?.speedIncreasePreset ?? 'gentle';
+    this.paddleSizePreset = payload?.settings?.paddleSizePreset ?? 'normal';
+
+    // Resolve speed config from presets
+    this.speedConfig = getSpeedConfig(this.ballSpeedPreset, this.speedIncreasePreset);
+
     // Extract powerupsEnabled
     this.powerupsEnabled = payload?.settings?.powerupsEnabled ?? false;
 
@@ -126,12 +138,14 @@ export default class PongScene extends Phaser.Scene {
     this.paused = false;
     this.aiFrozen = false;
     this.serveDirection = 'right';
-    this.currentSpeed = PONG.BASE_SPEED;
+    this.currentSpeed = getServeSpeed(this.speedConfig);
   }
 
   create(): void {
     // Set background color (dark blue-tinted near-black for neon aesthetic)
     this.cameras.main.setBackgroundColor('#0a0a0f');
+
+    const paddleHeight = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
     // Create top wall (static body)
     this.topWall = this.add.rectangle(
@@ -180,7 +194,7 @@ export default class PongScene extends Phaser.Scene {
       PONG.PADDLE_OFFSET_X,
       PONG.GAME_HEIGHT / 2,
       PONG.PADDLE_WIDTH,
-      PONG.PADDLE_HEIGHT,
+      paddleHeight,
       0xffffff,
     ) as Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
     this.physics.add.existing(this.leftPaddle, false);
@@ -192,7 +206,7 @@ export default class PongScene extends Phaser.Scene {
       PONG.GAME_WIDTH - PONG.PADDLE_OFFSET_X,
       PONG.GAME_HEIGHT / 2,
       PONG.PADDLE_WIDTH,
-      PONG.PADDLE_HEIGHT,
+      paddleHeight,
       0xffffff,
     ) as Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
     this.physics.add.existing(this.rightPaddle, false);
@@ -213,7 +227,7 @@ export default class PongScene extends Phaser.Scene {
     // Disable world bounds collision — we detect ball exit manually
     this.ball.body.setCollideWorldBounds(false);
     // Cap ball speed to prevent tunneling at high velocities
-    this.ball.body.setMaxSpeed(PONG.MAX_SPEED);
+    this.ball.body.setMaxSpeed(this.speedConfig.maxSpeed);
 
     // Add colliders: ball ↔ walls
     this.physics.add.collider(this.ball, this.topWall, this.onWallHit, undefined, this);
@@ -252,12 +266,12 @@ export default class PongScene extends Phaser.Scene {
     this.neonGlow = new NeonGlow(this);
     this.leftPaddleGlowId = this.neonGlow.addRectGlow(
       this.leftPaddle.x, this.leftPaddle.y,
-      PONG.PADDLE_WIDTH, PONG.PADDLE_HEIGHT,
+      PONG.PADDLE_WIDTH, paddleHeight,
       GLOW_PRESETS.paddle,
     );
     this.rightPaddleGlowId = this.neonGlow.addRectGlow(
       this.rightPaddle.x, this.rightPaddle.y,
-      PONG.PADDLE_WIDTH, PONG.PADDLE_HEIGHT,
+      PONG.PADDLE_WIDTH, paddleHeight,
       GLOW_PRESETS.paddle,
     );
     this.ballGlowId = this.neonGlow.addCircleGlow(
@@ -307,6 +321,8 @@ export default class PongScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     // Skip processing if match is over or paused
     if (this.matchOver || this.paused) return;
+
+    const paddleHeight = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
     // Left paddle: AI or keyboard
     if (this.isAIControlled && this.aiState) {
@@ -362,8 +378,8 @@ export default class PongScene extends Phaser.Scene {
     }
 
     // Clamp paddle Y positions to stay within walls
-    const minPaddleY = PONG.WALL_THICKNESS + PONG.PADDLE_HEIGHT / 2;
-    const maxPaddleY = PONG.GAME_HEIGHT - PONG.WALL_THICKNESS - PONG.PADDLE_HEIGHT / 2;
+    const minPaddleY = PONG.WALL_THICKNESS + paddleHeight / 2;
+    const maxPaddleY = PONG.GAME_HEIGHT - PONG.WALL_THICKNESS - paddleHeight / 2;
 
     if (this.leftPaddle.y < minPaddleY) {
       this.leftPaddle.y = minPaddleY;
@@ -441,18 +457,18 @@ export default class PongScene extends Phaser.Scene {
     // Position ball at center
     this.ball.setPosition(PONG.GAME_WIDTH / 2, PONG.GAME_HEIGHT / 2);
 
-    // Reset speed to BASE_SPEED
-    this.currentSpeed = PONG.BASE_SPEED;
+    // Reset speed to serve speed from preset config
+    this.currentSpeed = getServeSpeed(this.speedConfig);
 
     // Compute velocity direction
     const horizontalDir = this.serveDirection === 'right' ? 1 : -1;
     const verticalDir = Phaser.Math.FloatBetween(-0.5, 0.5);
 
-    // Normalize and scale to BASE_SPEED
+    // Normalize and scale to serve speed
     const vec = new Phaser.Math.Vector2(horizontalDir, verticalDir).normalize();
     this.ball.body.setVelocity(
-      vec.x * PONG.BASE_SPEED,
-      vec.y * PONG.BASE_SPEED,
+      vec.x * this.currentSpeed,
+      vec.y * this.currentSpeed,
     );
   }
 
@@ -494,7 +510,7 @@ export default class PongScene extends Phaser.Scene {
       this.triggerWin();
     } else {
       // Schedule next serve after delay
-      this.time.delayedCall(PONG.SERVE_DELAY_MS, () => {
+      this.time.delayedCall(PHYSICS.SERVE_DELAY_MS, () => {
         if (!this.matchOver && !this.paused) {
           this.serve();
         }
@@ -526,30 +542,48 @@ export default class PongScene extends Phaser.Scene {
     eventBridge.emit('audio:win');
   }
 
-  private onPaddleHit = (): void => {
+  private onPaddleHit = (
+    _ball: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
+    paddle: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
+  ): void => {
     // Emit audio event
     eventBridge.emit('audio:paddle-hit');
 
-    // Increase speed
-    this.currentSpeed = computeSpeedAfterHit(this.currentSpeed, {
-      baseSpeed: PONG.BASE_SPEED,
-      increment: PONG.SPEED_INCREMENT,
-      maxSpeed: PONG.MAX_SPEED,
-    });
+    const paddleObj = paddle as Phaser.GameObjects.Rectangle;
+    const paddleHeight = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
-    // Normalize ball velocity and scale to currentSpeed
-    const vx = this.ball.body.velocity.x;
-    const vy = this.ball.body.velocity.y;
-    const magnitude = Math.sqrt(vx * vx + vy * vy);
+    // Compute hit offset: normalized distance from paddle center
+    const hitOffset = (this.ball.y - paddleObj.y) / (paddleHeight / 2);
 
-    if (magnitude > 0) {
-      const scale = this.currentSpeed / magnitude;
-      this.ball.body.setVelocity(vx * scale, vy * scale);
-    }
+    // Compute bounce angle from hit offset
+    const angle = computeBounceAngle(hitOffset, PHYSICS.MAX_BOUNCE_ANGLE);
+
+    // Increase speed using preset-based speed ramping
+    this.currentSpeed = computeSpeedAfterHit(this.currentSpeed, this.speedConfig);
+
+    // Determine horizontal direction: +1 if ball hit left paddle (should go right), -1 if hit right paddle
+    const direction = paddleObj.x < PONG.GAME_WIDTH / 2 ? 1 : -1;
+
+    // Compute velocity from angle and speed
+    let vx = this.currentSpeed * Math.cos(angle) * direction;
+    let vy = this.currentSpeed * Math.sin(angle);
+
+    // Ensure minimum vertical speed to prevent degenerate trajectories
+    const adjusted = ensureMinimumVerticalSpeed(vx, vy, PHYSICS.MIN_VERTICAL_SPEED_RATIO);
+    vx = adjusted.vx;
+    vy = adjusted.vy;
+
+    this.ball.body.setVelocity(vx, vy);
   };
 
   private onWallHit = (): void => {
     eventBridge.emit('audio:wall-bounce');
+
+    // Ensure minimum vertical speed after wall collision
+    const vx = this.ball.body.velocity.x;
+    const vy = this.ball.body.velocity.y;
+    const adjusted = ensureMinimumVerticalSpeed(vx, vy, PHYSICS.MIN_VERTICAL_SPEED_RATIO);
+    this.ball.body.setVelocity(adjusted.vx, adjusted.vy);
   };
 
   private onPowerupCollect = (

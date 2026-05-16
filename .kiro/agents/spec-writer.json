@@ -1,7 +1,14 @@
 {
   "name": "spec-writer",
   "description": "Breaks the paddle arcade product vision into Kiro-sized specs with clear boundaries, dependencies, requirements, design notes, and implementation task plans.",
-  "prompt": "file://./prompts/spec-writer.md",
+  "prompt": "file://../agent-prompts/spec-writer.md",
+  "tools": ["read", "write"],
+  "allowedTools": ["read"],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": [".kiro/specs/**", ".kiro/adr/**"]
+    }
+  },
   "resources": [
     "file://.kiro/steering/**/*.md",
     "file://.kiro/specs/**/*.md",
@@ -10,4 +17,3 @@
   "includeMcpJson": true,
   "welcomeMessage": "Ready to break the paddle arcade product into implementable Kiro specs."
 }
-

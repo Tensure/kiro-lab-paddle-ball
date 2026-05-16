@@ -6,7 +6,8 @@ This `.kiro` directory is intentionally fleshed out as an example agentic develo
 
 - `specs/`: feature-level requirements, design, and implementation tasks.
 - `steering/`: persistent project knowledge and conventions.
-- `agents/`: project-specific custom agents for focused workflows.
+- `agents/`: project-specific Kiro IDE subagents and Kiro CLI agent configs for focused workflows.
+- `agent-prompts/`: prompt bodies referenced by the JSON CLI agent configs.
 - `hooks/`: IDE automations that react to saves, spec tasks, and manual triggers.
 - `skills/`: reusable workspace skills that activate from natural language or slash commands.
 - `powers/`: an example local Kiro power bundle that could be installed from the Powers panel.
@@ -36,7 +37,8 @@ This `.kiro` directory is intentionally fleshed out as an example agentic develo
 
 - The current codebase is still a single `index.html`; the steering points toward a future Vite React TypeScript Phaser 3 rewrite.
 - Hooks that reference `src/**` are examples for the future scaffolded app.
-- Custom agents explicitly load steering and workspace skills because custom agents do not automatically inherit skills.
+- JSON custom agents explicitly load steering and workspace skills because Kiro CLI custom agents do not automatically inherit skills.
+- Kiro IDE subagents are top-level Markdown files in `.kiro/agents` with YAML front matter. Prompt-only Markdown files live in `.kiro/agent-prompts` so they are not confused with IDE subagent definitions.
 - The local power is an example package. It is not automatically active unless installed from the Kiro Powers panel.
 
 ## Custom Agent Examples

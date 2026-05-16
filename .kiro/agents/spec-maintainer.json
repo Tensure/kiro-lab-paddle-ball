@@ -1,7 +1,14 @@
 {
   "name": "spec-maintainer",
   "description": "Maintains Kiro specs, steering, hooks, and skills so implementation stays aligned with product decisions.",
-  "prompt": "file://./prompts/spec-maintainer.md",
+  "prompt": "file://../agent-prompts/spec-maintainer.md",
+  "tools": ["read", "write"],
+  "allowedTools": ["read"],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": [".kiro/**"]
+    }
+  },
   "resources": [
     "file://.kiro/steering/**/*.md",
     "file://.kiro/specs/**/*.md",

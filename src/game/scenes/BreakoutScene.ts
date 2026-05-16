@@ -9,25 +9,25 @@ import {
   getMatchStatus,
   type BreakoutState,
 } from '../rules/life-rules';
-import { computeSpeedAfterHit } from '../rules/ball-speed';
+import { getSpeedConfig, PHYSICS, type SpeedConfig } from '../rules/physics-config';
+import { computeSpeedAfterHit, computeBrickHitSpeed, getServeSpeed } from '../rules/speed-ramping';
+import { computeBounceAngle } from '../rules/bounce-angle';
+import { ensureMinimumVerticalSpeed } from '../rules/vertical-speed';
 import { NeonGlow, GLOW_PRESETS } from '../systems/NeonGlow';
 import { NeonParticles } from '../systems/NeonParticles';
 import { PowerupManager } from '../systems/PowerupManager';
 import type { SceneLaunchPayload } from '../types/payload';
+import type { BallSpeedPreset, SpeedIncreasePreset, PaddleSizePreset } from '../types/settings';
 import type { PlayerId } from '../types/modes';
 import type { PowerupId } from '../types/powerup';
 
 const BREAKOUT = {
   GAME_WIDTH: 800,
   GAME_HEIGHT: 600,
-  PADDLE_WIDTH: 100,
   PADDLE_HEIGHT: 16,
   PADDLE_Y: 560,
   PADDLE_SPEED: 500,
   BALL_RADIUS: 8,
-  BASE_SPEED: 300,
-  SPEED_INCREMENT: 15,
-  MAX_SPEED: 550,
   WALL_THICKNESS: 16,
   BRICK_ROWS: 5,
   BRICK_COLUMNS: 10,
@@ -35,8 +35,6 @@ const BREAKOUT = {
   BRICK_PADDING: 4,
   BRICK_AREA_HEIGHT: 200,
   POINTS_PER_BRICK: 10,
-  SERVE_DELAY_MS: 750,
-  SPEED_INCREASE_ENABLED: true,
 } as const;
 
 const BRICK_COLORS = [
@@ -65,9 +63,14 @@ export default class BreakoutScene extends Phaser.Scene {
   private breakoutState!: BreakoutState;
   private matchOver = false;
   private paused = false;
-  private currentSpeed = BREAKOUT.BASE_SPEED;
+  private currentSpeed = 300;
   private _pausedVelocity: { x: number; y: number } | null = null;
-  private speedIncreaseEnabled = BREAKOUT.SPEED_INCREASE_ENABLED;
+
+  // Physics config (preset-based)
+  private speedConfig!: SpeedConfig;
+  private paddleSizePreset: PaddleSizePreset = 'normal';
+  private ballSpeedPreset: BallSpeedPreset = 'normal';
+  private speedIncreasePreset: SpeedIncreasePreset = 'gentle';
 
   // HUD
   private scoreText!: Phaser.GameObjects.Text;
@@ -98,8 +101,13 @@ export default class BreakoutScene extends Phaser.Scene {
     // Read payload from SceneLauncher (primary) or init data (fallback)
     const payload = data?.settings ? data : getLaunchPayload();
 
-    // Extract speedIncreaseEnabled — default to true
-    this.speedIncreaseEnabled = BREAKOUT.SPEED_INCREASE_ENABLED;
+    // Extract physics presets from match settings
+    this.ballSpeedPreset = payload?.settings?.ballSpeedPreset ?? 'normal';
+    this.speedIncreasePreset = payload?.settings?.speedIncreasePreset ?? 'gentle';
+    this.paddleSizePreset = payload?.settings?.paddleSizePreset ?? 'normal';
+
+    // Resolve speed config from presets
+    this.speedConfig = getSpeedConfig(this.ballSpeedPreset, this.speedIncreasePreset);
 
     // Extract powerupsEnabled
     this.powerupsEnabled = payload?.settings?.powerupsEnabled ?? false;
@@ -107,7 +115,7 @@ export default class BreakoutScene extends Phaser.Scene {
     // Reset match state
     this.matchOver = false;
     this.paused = false;
-    this.currentSpeed = BREAKOUT.BASE_SPEED;
+    this.currentSpeed = getServeSpeed(this.speedConfig);
     this.piercing = false;
     this.sticky = false;
     this.ballStuck = false;
@@ -117,6 +125,8 @@ export default class BreakoutScene extends Phaser.Scene {
   create(): void {
     // Set background color (dark blue-tinted near-black for neon aesthetic)
     this.cameras.main.setBackgroundColor('#0a0a0f');
+
+    const paddleWidth = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
     // Create top wall (static body, full width)
     this.topWall = this.add.rectangle(
@@ -208,7 +218,7 @@ export default class BreakoutScene extends Phaser.Scene {
     this.paddle = this.add.rectangle(
       BREAKOUT.GAME_WIDTH / 2,
       BREAKOUT.PADDLE_Y,
-      BREAKOUT.PADDLE_WIDTH,
+      paddleWidth,
       BREAKOUT.PADDLE_HEIGHT,
       0xffffff,
     ) as Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
@@ -228,7 +238,7 @@ export default class BreakoutScene extends Phaser.Scene {
     this.ball.body.setBounce(1, 1);
     this.ball.body.setCircle(BREAKOUT.BALL_RADIUS);
     this.ball.body.setCollideWorldBounds(false);
-    this.ball.body.setMaxSpeed(BREAKOUT.MAX_SPEED);
+    this.ball.body.setMaxSpeed(this.speedConfig.maxSpeed);
 
     // Add colliders
     this.physics.add.collider(this.ball, this.topWall, this.onWallHit, undefined, this);
@@ -273,7 +283,7 @@ export default class BreakoutScene extends Phaser.Scene {
     // Add glow to paddle and ball
     this.paddleGlowId = this.neonGlow.addRectGlow(
       this.paddle.x, this.paddle.y,
-      BREAKOUT.PADDLE_WIDTH, BREAKOUT.PADDLE_HEIGHT,
+      paddleWidth, BREAKOUT.PADDLE_HEIGHT,
       GLOW_PRESETS.paddle,
     );
     this.ballGlowId = this.neonGlow.addCircleGlow(
@@ -336,7 +346,7 @@ export default class BreakoutScene extends Phaser.Scene {
     eventBridge.emit('score:update', { left: 0, right: 0 });
 
     // Schedule first serve after delay
-    this.time.delayedCall(BREAKOUT.SERVE_DELAY_MS, () => {
+    this.time.delayedCall(PHYSICS.SERVE_DELAY_MS, () => {
       if (!this.matchOver && !this.paused) {
         this.serve();
       }
@@ -346,6 +356,8 @@ export default class BreakoutScene extends Phaser.Scene {
   update(): void {
     // Skip processing if match is over or paused
     if (this.matchOver || this.paused) return;
+
+    const paddleWidth = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
     // Paddle movement
     if (this.keyState.left) {
@@ -357,8 +369,8 @@ export default class BreakoutScene extends Phaser.Scene {
     }
 
     // Clamp paddle X within walls
-    const minPaddleX = BREAKOUT.WALL_THICKNESS + this.paddle.width / 2;
-    const maxPaddleX = BREAKOUT.GAME_WIDTH - BREAKOUT.WALL_THICKNESS - this.paddle.width / 2;
+    const minPaddleX = BREAKOUT.WALL_THICKNESS + paddleWidth / 2;
+    const maxPaddleX = BREAKOUT.GAME_WIDTH - BREAKOUT.WALL_THICKNESS - paddleWidth / 2;
 
     if (this.paddle.x < minPaddleX) {
       this.paddle.x = minPaddleX;
@@ -461,13 +473,17 @@ export default class BreakoutScene extends Phaser.Scene {
       BREAKOUT.PADDLE_Y - BREAKOUT.BALL_RADIUS - BREAKOUT.PADDLE_HEIGHT / 2 - 2,
     );
 
+    // Use preset serve speed
+    const serveSpeed = getServeSpeed(this.speedConfig);
+    this.currentSpeed = serveSpeed;
+
     // Compute velocity: upward with random horizontal angle
     const horizontal = Phaser.Math.FloatBetween(-0.4, 0.4);
     const vertical = -1;
     const vec = new Phaser.Math.Vector2(horizontal, vertical).normalize();
     this.ball.body.setVelocity(
-      vec.x * BREAKOUT.BASE_SPEED,
-      vec.y * BREAKOUT.BASE_SPEED,
+      vec.x * serveSpeed,
+      vec.y * serveSpeed,
     );
   }
 
@@ -500,8 +516,8 @@ export default class BreakoutScene extends Phaser.Scene {
     // Update HUD
     this.livesText.setText(`Lives: ${this.breakoutState.lives}`);
 
-    // Reset speed
-    this.currentSpeed = BREAKOUT.BASE_SPEED;
+    // Reset speed to serve speed
+    this.currentSpeed = getServeSpeed(this.speedConfig);
 
     // Emit events
     eventBridge.emit('lives:update', { remaining: this.breakoutState.lives });
@@ -518,7 +534,7 @@ export default class BreakoutScene extends Phaser.Scene {
       this.triggerLoss();
     } else {
       // Schedule serve after delay
-      this.time.delayedCall(BREAKOUT.SERVE_DELAY_MS, () => {
+      this.time.delayedCall(PHYSICS.SERVE_DELAY_MS, () => {
         if (!this.matchOver && !this.paused) {
           this.serve();
         }
@@ -538,28 +554,39 @@ export default class BreakoutScene extends Phaser.Scene {
     // Emit audio
     eventBridge.emit('audio:paddle-hit');
 
-    // Apply angle variation based on hit offset
-    const hitOffset = (this.ball.x - this.paddle.x) / (this.paddle.width / 2);
-    const angle = hitOffset * (Math.PI / 3); // max ±60° from vertical
+    const paddleWidth = PHYSICS.PADDLE_HEIGHT[this.paddleSizePreset];
 
-    // Optionally increase speed
-    if (this.speedIncreaseEnabled) {
-      this.currentSpeed = computeSpeedAfterHit(this.currentSpeed, {
-        baseSpeed: BREAKOUT.BASE_SPEED,
-        increment: BREAKOUT.SPEED_INCREMENT,
-        maxSpeed: BREAKOUT.MAX_SPEED,
-      });
-    }
+    // Compute hit offset: normalized distance from paddle center (horizontal)
+    const hitOffset = (this.ball.x - this.paddle.x) / (paddleWidth / 2);
+
+    // Compute bounce angle from hit offset
+    const angle = computeBounceAngle(hitOffset, PHYSICS.MAX_BOUNCE_ANGLE);
+
+    // Increase speed using preset-based speed ramping
+    this.currentSpeed = computeSpeedAfterHit(this.currentSpeed, this.speedConfig);
 
     const speed = this.currentSpeed;
-    this.ball.body.setVelocity(
-      speed * Math.sin(angle),
-      -speed * Math.cos(angle), // always upward after paddle hit
-    );
+
+    // Ball goes upward: vx from sin(angle), vy from -cos(angle)
+    let vx = speed * Math.sin(angle);
+    let vy = -speed * Math.cos(angle);
+
+    // Ensure minimum vertical speed to prevent degenerate trajectories
+    const adjusted = ensureMinimumVerticalSpeed(vx, vy, PHYSICS.MIN_VERTICAL_SPEED_RATIO);
+    vx = adjusted.vx;
+    vy = adjusted.vy;
+
+    this.ball.body.setVelocity(vx, vy);
   };
 
   private onWallHit = (): void => {
     eventBridge.emit('audio:wall-bounce');
+
+    // Ensure minimum vertical speed after wall collision
+    const vx = this.ball.body.velocity.x;
+    const vy = this.ball.body.velocity.y;
+    const adjusted = ensureMinimumVerticalSpeed(vx, vy, PHYSICS.MIN_VERTICAL_SPEED_RATIO);
+    this.ball.body.setVelocity(adjusted.vx, adjusted.vy);
   };
 
   private onBrickHit = (
@@ -593,9 +620,21 @@ export default class BreakoutScene extends Phaser.Scene {
       const vx = this.ball.body.velocity.x;
       const vy = this.ball.body.velocity.y;
       // The ball bounced off the brick, so we reverse the Y component to "undo" the bounce
-      // This effectively makes the ball pass through
       this.ball.body.setVelocity(vx, -vy);
     }
+
+    // Apply brick hit speed bump
+    this.currentSpeed = computeBrickHitSpeed(
+      this.currentSpeed,
+      this.speedConfig,
+      PHYSICS.BRICK_HIT_SPEED_BUMP,
+    );
+
+    // Ensure minimum vertical speed after brick collision
+    const bvx = this.ball.body.velocity.x;
+    const bvy = this.ball.body.velocity.y;
+    const adjusted = ensureMinimumVerticalSpeed(bvx, bvy, PHYSICS.MIN_VERTICAL_SPEED_RATIO);
+    this.ball.body.setVelocity(adjusted.vx, adjusted.vy);
 
     // Update state
     this.breakoutState = breakBrick(this.breakoutState, BREAKOUT.POINTS_PER_BRICK);

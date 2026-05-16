@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { getEligiblePowerups, isPowerupEligible } from './eligibility';
 import type { GameMode } from '../../types/modes';
-import type { PowerupId } from '../../types/powerup';
 
 describe('eligibility', () => {
   it('pong-solo returns 7 eligible powerups', () => {

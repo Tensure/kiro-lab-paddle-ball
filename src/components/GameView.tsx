@@ -17,6 +17,11 @@ function GameView(): React.JSX.Element {
   const winScore = useAppStore((s) => s.winScore);
   const aiDifficulty = useAppStore((s) => s.aiDifficulty);
   const powerupsEnabled = useAppStore((s) => s.powerupsEnabled);
+  const ballSpeedPreset = useAppStore((s) => s.ballSpeedPreset);
+  const paddleSizePreset = useAppStore((s) => s.paddleSizePreset);
+  const speedIncreasePreset = useAppStore((s) => s.speedIncreasePreset);
+  const startingLives = useAppStore((s) => s.startingLives);
+  const brickDensity = useAppStore((s) => s.brickDensity);
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -27,16 +32,16 @@ function GameView(): React.JSX.Element {
 
     switch (selectedMode) {
       case 'pong-solo':
-        settings = { mode: 'pong-solo', winScore, aiDifficulty, powerupsEnabled };
+        settings = { mode: 'pong-solo', winScore, aiDifficulty, powerupsEnabled, ballSpeedPreset, paddleSizePreset, speedIncreasePreset };
         players = ['left', 'right'];
         break;
       case 'pong-versus':
-        settings = { mode: 'pong-versus', winScore, powerupsEnabled };
+        settings = { mode: 'pong-versus', winScore, powerupsEnabled, ballSpeedPreset, paddleSizePreset, speedIncreasePreset };
         players = ['left', 'right'];
         break;
       case 'breakout':
       default:
-        settings = { mode: 'breakout', powerupsEnabled };
+        settings = { mode: 'breakout', powerupsEnabled, ballSpeedPreset, paddleSizePreset, speedIncreasePreset, startingLives, brickDensity };
         players = ['solo'];
         break;
     }
